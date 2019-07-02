@@ -1,6 +1,6 @@
 const express = require("express");
-const context = require("./middlewares/context");
-const logger = require("./middlewares/logger");
+const { context, logger } = require("./middlewares");
+
 const app = express();
 
 const helper = ({ logger }) => {
