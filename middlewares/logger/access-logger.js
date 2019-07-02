@@ -1,6 +1,7 @@
 const morgan = require("morgan");
 const winston = require("winston");
 const uuid = require("node-uuid");
+const transports = require("./transports");
 const MESSAGE = Symbol.for("message");
 
 morgan.token("id", (request) => {
@@ -16,9 +17,11 @@ morgan.token("id", (request) => {
   }
   return request.context.id;
 });
+
 morgan.token("date", () => new Date().toISOString());
 
 const requestLogFormat = `:date | :id | REQUEST | :remote-addr | :remote-user | :method :url HTTP/:http-version | :referrer | :user-agent`;
+
 const responseLogFormat = `:date | :id | RESPONSE | :method :url HTTP/:http-version | :status | :response-time ms | :res[content-length]`;
 
 const getFormat = () => winston.format((logEntry) => {
@@ -26,31 +29,12 @@ const getFormat = () => winston.format((logEntry) => {
   return logEntry;
 })();
 
-const transports = [new winston.transports.Console({
-  stderrLevels:["warn","error"]
-})];
+const logger = winston.createLogger({ level:"info", format: getFormat(), transports });
 
-const loggerOptions = {
-  format: getFormat(),
-  transports  
-};
+const stream = { write: (message) => logger.info(message) };
 
-const requestLogger = (level="silly") => {
-  const logger = winston.createLogger({
-    level,
-    ...loggerOptions
-  });
-  const stream = { write: (message) => logger.info(message) };
-  return morgan(requestLogFormat, { immediate: true, stream });
-};
+const requestLogger = () => morgan(requestLogFormat, { immediate: true, stream });
 
-const responseLogger = (level="silly") => {
-  const logger = winston.createLogger({
-    level,
-    ...loggerOptions
-  });
-  const stream = { write: (message) => logger.info(message) };
-  return morgan(responseLogFormat, { stream });
-};
+const responseLogger = () => morgan(responseLogFormat, { stream });
 
 module.exports = { requestLogger, responseLogger };
