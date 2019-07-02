@@ -19,7 +19,7 @@ morgan.token("id", (request) => {
 morgan.token("date", () => new Date().toISOString());
 
 const requestLogFormat = `:date | :id | REQUEST | :remote-addr | :remote-user | :method :url HTTP/:http-version | :referrer | :user-agent`;
-const responseLogFormat = `:date | :id | RESPONSE | :method :url HTTP/:http-version | :status | :res[content-length]`;
+const responseLogFormat = `:date | :id | RESPONSE | :method :url HTTP/:http-version | :status | :response-time ms | :res[content-length]`;
 
 const getFormat = () => winston.format((logEntry) => {
   logEntry[MESSAGE] = `${logEntry.message.trim()}`;
